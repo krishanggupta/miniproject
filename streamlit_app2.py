@@ -9,7 +9,7 @@ st.set_page_config(page_title="Diabetic Retinopathy Classifier", layout="wide")
 # ---- Load ONNX model ----
 @st.cache_resource
 def load_onnx_model():
-    session = ort.InferenceSession("densenet121_dr_finetuned.onnx")
+    session = ort.InferenceSession("mlmodel.onnx")
     return session, session.get_inputs()[0].name
 
 session, input_name = load_onnx_model()
