@@ -1,0 +1,4 @@
+python==3.10
+streamlit
+tensorflow-cpu==2.13.0
+gdown
