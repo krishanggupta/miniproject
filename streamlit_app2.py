@@ -1,19 +1,18 @@
 import streamlit as st
 import numpy as np
-from tensorflow.keras.models import load_model
-from tensorflow.keras.preprocessing.image import img_to_array
-from tensorflow.keras.applications.efficientnet import preprocess_input
 from PIL import Image
+import onnxruntime as ort
 
 # ---- Page Configuration ----
 st.set_page_config(page_title="Diabetic Retinopathy Classifier", layout="wide")
 
-# ---- Load model ----
+# ---- Load ONNX model ----
 @st.cache_resource
-def load_trained_model():
-    return load_model("/Users/krishanggupta/Desktop/MyFiles/college/Sem2/Mini Project/Dataset/DR Dataset_merged/Models/Evaluation2Modesl/densenet121_dr_finetuned_73acc.h5")  # your model path
+def load_onnx_model():
+    session = ort.InferenceSession("densenet121_dr_finetuned.onnx")
+    return session, session.get_inputs()[0].name
 
-model = load_trained_model()
+session, input_name = load_onnx_model()
 
 # ---- Class Labels ----
 class_labels = ['No DR', 'Mild', 'Moderate', 'Severe', 'Proliferative DR']
@@ -35,12 +34,11 @@ if page == "📷 Classify Image":
 
         # Preprocess
         image = image.resize((300, 300))
-        image_array = img_to_array(image)
-        image_array = preprocess_input(image_array)
-        image_array = np.expand_dims(image_array, axis=0)
+        img_array = np.array(image) / 255.0
+        img_array = np.expand_dims(img_array, axis=0).astype(np.float32)
 
         # Predict
-        prediction = model.predict(image_array)[0]
+        prediction = session.run(None, {input_name: img_array})[0][0]
         predicted_class = class_labels[np.argmax(prediction)]
         confidence = np.max(prediction) * 100
 
@@ -54,16 +52,15 @@ if page == "📷 Classify Image":
 elif page == "📊 Model Info":
     st.title("📊 Model Information")
     st.markdown("""
-    - **Model Type**: EfficientNetB3
+    - **Model Type**: Densenet121 (converted to ONNX)
     - **Trained On**: Labeled Indian DR Dataset
     - **Input Size**: 300x300 RGB
     - **Classes**: No DR, Mild, Moderate, Severe, Proliferative DR
-    - **Accuracy Achieved**: ~90% (fine-tuned with class weights)
-    - **Loss Function**: Categorical Crossentropy
-    - **Optimizer**: Adam
+    - **Accuracy Achieved**: ~73%
+    - **Inference Engine**: ONNX Runtime (no TensorFlow required!)
     """)
 
-    st.image("https://miro.medium.com/v2/resize:fit:1400/1*nzO4e6pgvL3uq1Ap46adkA.png", caption="EfficientNet Architecture (source: Medium)")
+    st.image("https://miro.medium.com/v2/resize:fit:1400/1*ckLNL5fx3JNhgNzKeOnx_w.png", caption="Densenet Architecture")
 
 # ---- Tab 3: DR Stages ----
 elif page == "📚 DR Stages":
@@ -88,12 +85,11 @@ elif page == "👨‍⚕️ About Us":
     st.markdown("""
     This app was created by **Krishang Gupta** as part of a machine learning project to automate the classification of Diabetic Retinopathy using deep learning.
 
-    - 🔬 Based on EfficientNetB3, fine-tuned on real Indian DR images
-    - 🧠 Model trained with data augmentation & class balancing
+    - 🔬 Based on Densenet121, converted to ONNX
+    - 🧠 Inference done using ONNX Runtime (faster + cloud-ready)
     - 🧑‍🏫 Goal: Assist medical professionals in early detection of DR
 
     [📧 Contact](mailto:krishang@example.com) | [🌐 LinkedIn](https://linkedin.com/in/krishanggupta)
     """)
 
     st.image("https://upload.wikimedia.org/wikipedia/commons/0/06/Retinopathy3.jpg", caption="Sample DR Image")
-
