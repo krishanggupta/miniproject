@@ -3,4 +3,3 @@ pillow
 matplotlib
 streamlit
 opencv-python-headless
-tensorflow
