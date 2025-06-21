@@ -1,5 +1,5 @@
+streamlit
+onnxruntime
 numpy
 pillow
 matplotlib
-streamlit
-opencv-python-headless
