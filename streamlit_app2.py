@@ -3,6 +3,9 @@ import numpy as np
 from PIL import Image
 import onnxruntime as ort
 
+import os
+st.write("Files in current directory:", os.listdir())
+
 # ---- Page Configuration ----
 st.set_page_config(page_title="Diabetic Retinopathy Classifier", layout="wide")
 
