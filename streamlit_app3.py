@@ -22,6 +22,7 @@ model = genai.GenerativeModel(model_name="gemini-2.0-flash")
 def generate_report_text(predicted_class, confidence, stage_prob,p_name='Krishang',
                          p_age=23,p_gender='Male'):
     prompt = f"""
+    You are VNIT MedAssistant!
     Create a short and personalized diagnostic report for a diabetic retinopathy screening.
     The predicted stage is: {predicted_class}, with a model confidence of {confidence:.2f}%. The results
     of predicted class might be slightly inaccurate hence, base your report on the probabilities that
@@ -32,6 +33,9 @@ def generate_report_text(predicted_class, confidence, stage_prob,p_name='Krishan
 
     Explain the implications of this stage to a non-medical person, suggest next medical steps,
     and emphasize the importance of regular eye exams. Make it clear, compassionate, and supportive.
+
+    Start by Mentioning the Title of the report, Then Patient Name, Patient Age, Patient Gender,
+    then give your analysis.
     """
     response = model.generate_content(prompt)
     return response.text
@@ -49,6 +53,34 @@ def create_pdf(report_text, predicted_class):
     temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".pdf")
     pdf.output(temp_file.name)
     return temp_file.name
+
+from reportlab.lib.pagesizes import A4
+from reportlab.pdfgen import canvas
+from reportlab.lib.units import inch
+
+def create_pdf2(text, predicted_class, image_path):
+    pdf_path = f"report_{predicted_class}.pdf"
+    c = canvas.Canvas(pdf_path, pagesize=A4)
+    width, height = A4
+
+    # Title and text
+    c.setFont("Helvetica-Bold", 16)
+    c.drawString(72, height - 72, "Diabetic Retinopathy Classification Report")
+
+    c.setFont("Helvetica", 12)
+    text_lines = text.split("\n")
+    y = height - 100
+    for line in text_lines:
+        c.drawString(72, y, line)
+        y -= 18
+
+    # Add image at the bottom
+    image_y = 150
+    c.drawImage(image_path, 72, image_y, width=4*inch, preserveAspectRatio=True, mask='auto')
+
+    c.showPage()
+    c.save()
+    return pdf_path
 
 
 
@@ -103,7 +135,8 @@ if page == "📷 Classify Image":
             if st.button("📝 Generate Custom Report PDF"):
                 with st.spinner("Generating report..."):
                     report_text = generate_report_text(predicted_class, confidence, stage_prob)
-                    pdf_path = create_pdf(report_text, predicted_class)
+
+                    pdf_path = create_pdf2(report_text, predicted_class)
 
                     with open(pdf_path, "rb") as f:
                         st.download_button("📥 Download PDF Report", f, file_name="DR_Report.pdf", mime="application/pdf")
