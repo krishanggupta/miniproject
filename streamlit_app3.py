@@ -86,8 +86,8 @@ elif page == "📚 DR Stages":
         st.write(desc)
         st.progress((list(stages.keys()).index(stage) + 1) / len(stages))
 
-# ---- Tab 4: About Us ----
-elif page == "👨‍⚕️ About Us":
+# ---- Tab 4: About Me ----
+elif page == "👨‍⚕️ About Me":
     st.title("👨‍💻 About This Project")
     st.markdown("""
     This app was created by **Krishang Gupta** as part of a machine learning project to automate the classification of Diabetic Retinopathy using deep learning.
@@ -96,7 +96,7 @@ elif page == "👨‍⚕️ About Us":
     - 🧠 Inference done using ONNX Runtime (faster + cloud-ready)
     - 🧑‍🏫 Goal: Assist medical professionals in early detection of DR
 
-    [📧 Contact](mailto:krishang@example.com) | [🌐 LinkedIn](https://linkedin.com/in/krishanggupta)
+    [📧 Contact](mailto:krishanggupta.kg@gmail.com) | [🌐 LinkedIn](https://www.linkedin.com/in/krishang-gupta-0b0041305/)
     """)
 
     st.image("https://upload.wikimedia.org/wikipedia/commons/0/06/Retinopathy3.jpg", caption="Sample DR Image")
