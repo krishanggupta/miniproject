@@ -16,7 +16,7 @@ st.set_page_config(page_title="Diabetic Retinopathy Classifier", layout="wide")
 # Initialize Gemini API
 genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
 
-model = genai.GenerativeModel(model_name="models/gemini-pro")
+model = genai.GenerativeModel(model_name="gemini-2.0-flash")
 
 
 def generate_report_text(predicted_class, confidence, stage_prob,p_name='Krishang',
