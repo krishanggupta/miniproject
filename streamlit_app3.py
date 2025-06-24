@@ -16,12 +16,19 @@ st.set_page_config(page_title="Diabetic Retinopathy Classifier", layout="wide")
 # Initialize Gemini API
 genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
 
-model = genai.GenerativeModel("gemini-pro")
+model = genai.GenerativeModel(model_name="models/gemini-pro")
 
-def generate_report_text(predicted_class, confidence):
+
+def generate_report_text(predicted_class, confidence, stage_prob,p_name='Krishang',
+                         p_age=23,p_gender='Male'):
     prompt = f"""
     Create a short and personalized diagnostic report for a diabetic retinopathy screening.
-    The predicted stage is: {predicted_class}, with a model confidence of {confidence:.2f}%.
+    The predicted stage is: {predicted_class}, with a model confidence of {confidence:.2f}%. The results
+    of predicted class might be slightly inaccurate hence, base your report on the probabilities that
+    were predicted for different stages: {stage_prob}. 
+
+    Your report should be based on personalised details i.e suggestions based on age given by {p_age}, 
+    gender given by {p_gender}. Mention the person's name in the report given by {p_name}.
 
     Explain the implications of this stage to a non-medical person, suggest next medical steps,
     and emphasize the importance of regular eye exams. Make it clear, compassionate, and supportive.
@@ -92,10 +99,10 @@ if page == "📷 Classify Image":
             st.markdown(f"### 📈 Confidence: `{confidence:.2f}%`")
             st.markdown("#### 🔍 Full Prediction Probabilities:")
             st.bar_chart({label: float(prob) for label, prob in zip(class_labels, prediction)})
-
+            stage_prob={label: float(prob) for label, prob in zip(class_labels, prediction)}
             if st.button("📝 Generate Custom Report PDF"):
                 with st.spinner("Generating report..."):
-                    report_text = generate_report_text(predicted_class, confidence)
+                    report_text = generate_report_text(predicted_class, confidence, stage_prob)
                     pdf_path = create_pdf(report_text, predicted_class)
 
                     with open(pdf_path, "rb") as f:
