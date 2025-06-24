@@ -8,6 +8,13 @@ from fpdf import FPDF
 import tempfile
 import os
 
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.units import inch
+from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Image as RLImage
+from reportlab.lib.styles import getSampleStyleSheet
+
+
 # ---- Page Configuration ----
 st.set_page_config(page_title="Diabetic Retinopathy Classifier", layout="wide")
 
@@ -54,36 +61,35 @@ def create_pdf(report_text, predicted_class):
     pdf.output(temp_file.name)
     return temp_file.name
 
-from reportlab.lib.pagesizes import A4
-from reportlab.pdfgen import canvas
-from reportlab.lib.units import inch
 
-def create_pdf2(text, predicted_class, image_path):
+def create_pdf2(report_text, predicted_class, image_path):
     pdf_path = f"report_{predicted_class}.pdf"
-    c = canvas.Canvas(pdf_path, pagesize=A4)
-    width, height = A4
+    
+    doc = SimpleDocTemplate(pdf_path, pagesize=A4,
+                            rightMargin=72, leftMargin=72,
+                            topMargin=72, bottomMargin=72)
+    
+    styles = getSampleStyleSheet()
+    flowables = []
 
     # Title
-    c.setFont("Helvetica-Bold", 16)
-    c.drawString(72, height - 72, "Diabetic Retinopathy Report")
+    title = Paragraph("<b>Diabetic Retinopathy Report</b>", styles["Title"])
+    flowables.append(title)
+    flowables.append(Spacer(1, 12))
 
-    # Report Text
-    c.setFont("Helvetica", 12)
-    y = height - 100
-    for line in text.split("\n"):
-        c.drawString(72, y, line)
-        y -= 18
+    # Report Text (word-wrapped)
+    for paragraph in report_text.split("\n\n"):
+        p = Paragraph(paragraph.replace("\n", "<br/>"), styles["Normal"])
+        flowables.append(p)
+        flowables.append(Spacer(1, 12))
 
-    # Add retina image at the bottom
-    try:
-        c.drawImage(image_path, 72, 100, width=4*inch, preserveAspectRatio=True, mask='auto')
-    except Exception as e:
-        print(f"Failed to add image: {e}")
+    # Add Image (scaled to width)
+    flowables.append(Spacer(1, 24))
+    img = RLImage(image_path, width=4*inch, height=4*inch)
+    flowables.append(img)
 
-    c.showPage()
-    c.save()
+    doc.build(flowables)
     return pdf_path
-
 
 
 # ---- Load ONNX model ----
