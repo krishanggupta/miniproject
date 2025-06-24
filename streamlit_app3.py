@@ -21,7 +21,7 @@ class_labels = ['No DR', 'Mild', 'Moderate', 'Severe', 'Proliferative DR']
 
 # ---- Sidebar ----
 st.sidebar.title("🧭 Navigation")
-page = st.sidebar.radio("Go to", ["📷 Classify Image", "📊 Model Info", "📚 DR Stages", "👨‍⚕️ About Us"])
+page = st.sidebar.radio("Go to", ["📷 Classify Image", "📊 Model Info", "📚 DR Stages", "👨‍⚕️ About Me"])
 
 # ---- Tab 1: Classify Image ----
 if page == "📷 Classify Image":
