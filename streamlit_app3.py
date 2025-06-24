@@ -3,8 +3,47 @@ import numpy as np
 from PIL import Image
 import onnxruntime as ort
 
+import google.generativeai as genai
+from fpdf import FPDF
+import tempfile
+import os
+
 # ---- Page Configuration ----
 st.set_page_config(page_title="Diabetic Retinopathy Classifier", layout="wide")
+
+
+
+# Initialize Gemini API
+genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
+
+model = genai.GenerativeModel("gemini-pro")
+
+def generate_report_text(predicted_class, confidence):
+    prompt = f"""
+    Create a short and personalized diagnostic report for a diabetic retinopathy screening.
+    The predicted stage is: {predicted_class}, with a model confidence of {confidence:.2f}%.
+
+    Explain the implications of this stage to a non-medical person, suggest next medical steps,
+    and emphasize the importance of regular eye exams. Make it clear, compassionate, and supportive.
+    """
+    response = model.generate_content(prompt)
+    return response.text
+
+def create_pdf(report_text, predicted_class):
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font("Arial", "B", 16)
+    pdf.cell(0, 10, "Diabetic Retinopathy Report", ln=True, align="C")
+
+    pdf.set_font("Arial", "", 12)
+    pdf.multi_cell(0, 10, f"\nDiagnosis: {predicted_class}\n")
+    pdf.multi_cell(0, 10, report_text)
+
+    temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".pdf")
+    pdf.output(temp_file.name)
+    return temp_file.name
+
+
 
 # ---- Load ONNX model ----
 @st.cache_resource
@@ -51,11 +90,22 @@ if page == "📷 Classify Image":
 
             st.markdown(f"### 🧠 Prediction: `{predicted_class}`")
             st.markdown(f"### 📈 Confidence: `{confidence:.2f}%`")
-
             st.markdown("#### 🔍 Full Prediction Probabilities:")
             st.bar_chart({label: float(prob) for label, prob in zip(class_labels, prediction)})
+
+            if st.button("📝 Generate Custom Report PDF"):
+                with st.spinner("Generating report..."):
+                    report_text = generate_report_text(predicted_class, confidence)
+                    pdf_path = create_pdf(report_text, predicted_class)
+
+                    with open(pdf_path, "rb") as f:
+                        st.download_button("📥 Download PDF Report", f, file_name="DR_Report.pdf", mime="application/pdf")
+
+                os.remove(pdf_path)
+
         except Exception as e:
             st.error(f"❌ Model inference failed: {str(e)}")
+
 
 # ---- Tab 2: Model Info ----
 elif page == "📊 Model Info":
