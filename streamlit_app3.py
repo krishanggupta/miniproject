@@ -63,20 +63,22 @@ def create_pdf2(text, predicted_class, image_path):
     c = canvas.Canvas(pdf_path, pagesize=A4)
     width, height = A4
 
-    # Title and text
+    # Title
     c.setFont("Helvetica-Bold", 16)
-    c.drawString(72, height - 72, "Diabetic Retinopathy Classification Report")
+    c.drawString(72, height - 72, "Diabetic Retinopathy Report")
 
+    # Report Text
     c.setFont("Helvetica", 12)
-    text_lines = text.split("\n")
     y = height - 100
-    for line in text_lines:
+    for line in text.split("\n"):
         c.drawString(72, y, line)
         y -= 18
 
-    # Add image at the bottom
-    image_y = 150
-    c.drawImage(image_path, 72, image_y, width=4*inch, preserveAspectRatio=True, mask='auto')
+    # Add retina image at the bottom
+    try:
+        c.drawImage(image_path, 72, 100, width=4*inch, preserveAspectRatio=True, mask='auto')
+    except Exception as e:
+        print(f"Failed to add image: {e}")
 
     c.showPage()
     c.save()
@@ -134,14 +136,20 @@ if page == "📷 Classify Image":
             stage_prob={label: float(prob) for label, prob in zip(class_labels, prediction)}
             if st.button("📝 Generate Custom Report PDF"):
                 with st.spinner("Generating report..."):
+                    # Save uploaded image temporarily
+                    temp_image_path = "temp_uploaded_image.png"
+                    image.save(temp_image_path)
+
                     report_text = generate_report_text(predicted_class, confidence, stage_prob)
 
-                    pdf_path = create_pdf2(report_text, predicted_class)
+                    # Pass the image path to the PDF generator
+                    pdf_path = create_pdf2(report_text, predicted_class, temp_image_path)
 
                     with open(pdf_path, "rb") as f:
                         st.download_button("📥 Download PDF Report", f, file_name="DR_Report.pdf", mime="application/pdf")
 
-                os.remove(pdf_path)
+                    os.remove(pdf_path)
+                    os.remove(temp_image_path)
 
         except Exception as e:
             st.error(f"❌ Model inference failed: {str(e)}")
