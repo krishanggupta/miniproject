@@ -175,6 +175,7 @@ class_labels = ['No DR', 'Mild', 'Moderate', 'Severe', 'Proliferative DR']
 st.sidebar.title("🧭 Navigation")
 page = st.sidebar.radio("Go to", ["📷 Classify Image", "📊 Model Info", "📚 DR Stages", "👨‍⚕️ About Me"])
 
+
 # ---- Tab 1: Classify Image ----
 if page == "📷 Classify Image":
     st.title("🩺 Diabetic Retinopathy Classifier")
@@ -212,7 +213,8 @@ if page == "📷 Classify Image":
                     temp_image_path = "temp_uploaded_image.png"
                     image.save(temp_image_path)
 
-                    report_text = generate_report_text(predicted_class, confidence, stage_prob)
+                    report_text = generate_report_text(predicted_class, confidence, stage_prob,p_name=getname,
+                                                       p_age=getage,p_gender=getgender)
 
                     # Pass the image path to the PDF generator
                     pdf_path = create_pdf3(report_text, predicted_class, temp_image_path)
