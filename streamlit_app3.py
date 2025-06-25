@@ -116,7 +116,7 @@ def add_watermark(canvas, doc):
     canvas.saveState()
     canvas.setFont('Helvetica', 8)
     canvas.setFillColor(grey)
-    footer_text = "This report is AI-generated and for informational use only. Please consult a medical professional."
+    footer_text = "Disclaimer: This report is AI-generated and for reference purpose only. You are required to consult a medical professional for accurate analysis."
     canvas.drawCentredString(A4[0] / 2, 0.5 * inch, footer_text)
     canvas.restoreState()
 
