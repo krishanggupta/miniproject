@@ -158,13 +158,13 @@ with tab1:
         dob = st.date_input("Date of Birth", value=date.today(), min_value=date(1900, 1, 1), max_value=date.today())
         
         today = date.today()
-        age = today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))
+        age = str(today.year - dob.year) + "yrs"#- ((today.month, today.day) < (dob.month, dob.day))
 
         st.session_state.user_info["age"] = age
     else:
         age = st.number_input("Age (in years)", min_value=1, max_value=120)
-        st.session_state.user_info["age"] = int(age)
-        st.session_state.user_info["dob"] = None
+        st.session_state.user_info["age"] = str(int(age))+'yrs'
+        #st.session_state.user_info["dob"] = None
 
 with tab2:
     st.header("📷 Upload Fundus Image")
