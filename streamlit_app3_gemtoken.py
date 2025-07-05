@@ -189,7 +189,7 @@ with tab2:
                     image.save(temp_image_path)
                     face_image_path = st.session_state.user_info.get("image_path", None)
                     report_text = generate_report_text(predicted_class, confidence, stage_prob)
-                    pdf_path = create_pdf4(report_text, predicted_class, temp_image_path, face_image_path)
+                    pdf_path = create_pdf4(report_text, predicted_class, temp_image_path)
                     with open(pdf_path, "rb") as f:
                         st.download_button("📥 Download PDF Report", f, file_name="DR_Report.pdf", mime="application/pdf")
                     os.remove(pdf_path)
