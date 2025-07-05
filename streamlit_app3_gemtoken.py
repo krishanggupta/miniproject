@@ -156,7 +156,9 @@ with tab1:
 
     if age_option == "Date of Birth":
         dob = st.date_input("Date of Birth", value=date.today(), min_value=date(1900, 1, 1), max_value=date.today())
-        st.session_state.user_info["age"] = int(date.today()-dob)
+        
+        finalage=date.today.year-dob.year 
+        st.session_state.user_info["age"] = finalage
     else:
         age = st.number_input("Age (in years)", min_value=1, max_value=120)
         st.session_state.user_info["age"] = int(age)
