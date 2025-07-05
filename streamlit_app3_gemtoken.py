@@ -47,7 +47,6 @@ def generate_report_text(predicted_class, confidence, stage_prob):
     Explain the implications of this stage to a non-medical person, suggest next medical steps,
     and emphasize the importance of regular eye exams. Make it clear, compassionate, and supportive.
 
-    At the end, always mention that you are an AI and refer the patient to an Ophthalmologist. 
     """
     response = model.generate_content(prompt)
     return response.text
@@ -64,7 +63,7 @@ def add_watermark(canvas, doc):
     canvas.saveState()
     canvas.setFont('Helvetica', 8)
     canvas.setFillColor(grey)
-    footer_text = "Disclaimer: This report is AI-generated and for reference purpose only."
+    footer_text = "Disclaimer: This report is AI-generated and for reference purpose only. Please consult with an Ophthalmologist for a comprehensive evaluation and personalized treatment plan."
     canvas.drawCentredString(A4[0] / 2, 0.5 * inch, footer_text)
     canvas.restoreState()
 
