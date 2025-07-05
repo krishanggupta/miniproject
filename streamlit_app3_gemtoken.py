@@ -155,21 +155,7 @@ with tab1:
     age_option = st.radio("Provide: ", ["Date of Birth", "Age"])
 
     if age_option == "Date of Birth":
-        #dob = st.date_input("Date of Birth", value=date.today(), min_value=date(1900, 1, 1), max_value=date.today())
-        dob = st.date_input("Date of Birth", value="today",
-                             min_value=datetime.date(1900,1,1), 
-                             max_value=datetime.date('today'), 
-                             key=None, help='Please enter/select your DOB', 
-                             on_change=None, args=None, kwargs=None,
-                             format="DD/MM/YYYY", disabled=False, 
-                             label_visibility="visible", width="stretch")
-        if dob:
-            today = date.today()
-            years = today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))
-            months = (today.month - dob.month) % 12
-            st.success(f"Age: {years} years and {months} months")
-            st.session_state.user_info["age"] = years
-            st.session_state.user_info["dob"] = dob
+        dob = st.date_input("Date of Birth", value=date.today(), min_value=date(1900, 1, 1), max_value=date.today())
     else:
         age = st.number_input("Age (in years)", min_value=1, max_value=120)
         st.session_state.user_info["age"] = int(age)
