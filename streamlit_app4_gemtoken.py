@@ -199,7 +199,7 @@ with tab2:
                     temp_image_path = "temp_fundus.png"
                     image.save(temp_image_path)
                     report_text = generate_report_text(predicted_class, confidence, stage_prob)
-                    pdf1 = pdfmaker2.create_pdf('DRprediction.pdf',stage_prob,patient_info,general_info)
+                    pdf1 = pdfmaker2.create_pdf('DRprediction.pdf',stage_prob,patient_info,general_info,temp_image_path)
                     pdf2_path=pdfmaker2.create_pdf_helper(report_text)
                     merged_pdf_path=pdfmaker2.merge_pdfs('DRprediction.pdf',pdf2_path,'finall.pdf')
                     with open(merged_pdf_path, "rb") as f:
