@@ -193,7 +193,7 @@ def section6(canvas_obj, general_prediction):
     draw_separator(canvas_obj,235*mm)
 
 
-def create_pdf(filename,prob_data,patient_info,general_info):
+def create_pdf(filename,prob_data,patient_info,general_info,myimage):
     # patient_info = {
     #         "Name": "John Doe",
     #         "Patient ID": "123456",
@@ -211,7 +211,7 @@ def create_pdf(filename,prob_data,patient_info,general_info):
     section1(c)
     section2(c,**{'patient_info':patient_info,'general_info':general_info})
     section3(c)
-    section4(c,'fn.jpg')
+    section4(c,myimage)
     section5(c,prob_data)
     add_disclaimer(c,
                    text="Disclaimer: This report is AI-generated and for reference purpose only. Please consult with an Ophthalmologist for a comprehensive evaluation and personalized treatment plan.")
