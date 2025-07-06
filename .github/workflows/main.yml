@@ -2,8 +2,7 @@ name: Daily Empty Commit
 
 on:
   schedule:
-    - cron: '0 * * * *'  # Runs hourly
-  workflow_dispatch:       # Optional: allows manual run from GitHub UI
+    - cron: '0 * * * *'  # Runs hourly, next line: #workflow_dispatch:       # Optional: allows manual run from GitHub UI
 
 jobs:
   daily-commit:
