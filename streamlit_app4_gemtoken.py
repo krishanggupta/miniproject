@@ -3,6 +3,7 @@ import numpy as np
 from PIL import Image
 import onnxruntime as ort
 from datetime import datetime
+import re
 
 import google.generativeai as genai
 from fpdf import FPDF
@@ -36,6 +37,7 @@ import pdfmaker2
 st.set_page_config(page_title="Diabetic Retinopathy Classifier", layout="wide")
 
 genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
+#genai.configure(api_key="zaSyAIhrSVwoKg69NrmWhE_e-B34zkWz5nZJ8")
 
 model = genai.GenerativeModel(model_name="gemini-2.0-flash")
 
@@ -48,18 +50,31 @@ if "user_info" not in st.session_state:
         "image_path": None
     }
 def generate_report_text(predicted_class, confidence, stage_prob):
+    
     info = st.session_state.user_info
     prompt = f"""
-    You are VNIT MedAssistant! Introduce yourself first. 
+    You are generating a medical report. Start directly. 
+   
+    You are an AI Assitant called, VNIT MedAssistant! Introduce yourself first and greet the user whose name is
+    {info['name']}. Give introduction by Keeping in mind , Age: {info['age']}, Gender: {info['gender']} of user and address accordingly.
+    
+    Do not include any conversational phrases such as “Okay”, “Sure”, “Here's the response”. 
+    Write as if this is the final version being printed in a formal medical document.
+    Always start printing with 'Greetings! I am VNIT MedAssistant! How are you doing? After this, greet the user with
+    the name 
+    Dont use any other approach to start. Never mention date or anything else. Just keep in mind user's age and
+    user's gender while you address him/her.
 
-    Create a short and personalized diagnostic report for a diabetic retinopathy screening.
-    The predicted stage is: {predicted_class}, with a model confidence of {confidence:.2f}%. 
-    Base your report on the probabilities for different stages: {stage_prob}. 
 
-    Patient Name: {info['name']}, Age: {info['age']}, Gender: {info['gender']}.
+    You are to explain the implications of the The predicted diabteic retinopathy stage which is: {predicted_class} in one
+    section, suggest next medical steps in another section
+    and emphasize the importance of regular eye exams. 
+    Make it clear, compassionate, and supportive.
+    We have created a short and personalized diagnostic report for a diabetic retinopathy screening.
+    Dont give any answer in bullets. Make it paragraph. If bullet is required then instead separate it via one line
 
-    Explain the implications of this stage to a non-medical person, suggest next medical steps,
-    and emphasize the importance of regular eye exams. Make it clear, compassionate, and supportive.
+
+    At the end, say thank you.   
 
     """
     response = model.generate_content(prompt)
@@ -165,8 +180,8 @@ with tab2:
     patient_info = {
     "Name": st.session_state.user_info.get("name", ""),
     "Patient ID": st.session_state.user_info.get("patient_id", ""),
-    "DOB": st.session_state.user_info.get("dob", ""),
-    "Gender": st.session_state.user_info.get("gender", "")
+    "Age":  st.session_state.user_info.get("age",f"{age}yrs"),
+"Gender": st.session_state.user_info.get("gender", "")
      }
 
     general_info = {
@@ -183,30 +198,47 @@ with tab2:
         img_array = np.array(image).astype(np.float32) / 255.0
         img_array = np.expand_dims(img_array, axis=0)
 
-        try:
-            prediction = session.run(None, {input_name: img_array})[0][0]
-            predicted_class = class_labels[np.argmax(prediction)]
-            confidence = np.max(prediction) * 100
-            stage_prob = {label: float(prob) for label, prob in zip(class_labels, prediction)}
+        
+        prediction = session.run(None, {input_name: img_array})[0][0]
+        predicted_class = class_labels[np.argmax(prediction)]
+        confidence = np.max(prediction) * 100
+        stage_prob = {label: float(prob) for label, prob in zip(class_labels, prediction)}
 
-            st.markdown(f"### 🧠 Prediction: `{predicted_class}`")
-            st.markdown(f"### 📈 Confidence: `{confidence:.2f}%`")
-            st.markdown("#### 🔍 Full Prediction Probabilities:")
-            st.bar_chart(stage_prob)
+        st.markdown(f"### 🧠 Prediction: `{predicted_class}`")
+        st.markdown(f"### 📈 Confidence: `{confidence:.2f}%`")
+        st.markdown("#### 🔍 Full Prediction Probabilities:")
+        st.bar_chart(stage_prob)
 
-            if st.button("📝 Generate Report PDF"):
-                with st.spinner("Generating report..."):
-                    temp_image_path = "temp_fundus.png"
-                    image.save(temp_image_path)
-                    report_text = generate_report_text(predicted_class, confidence, stage_prob)
-                    pdf1 = pdfmaker2.create_pdf('DRprediction.pdf',stage_prob,patient_info,general_info,temp_image_path)
-                    pdf2_path=pdfmaker2.create_pdf_helper(report_text)
-                    merged_pdf_path=pdfmaker2.merge_pdfs('DRprediction.pdf',pdf2_path,'finall.pdf')
-                    with open(merged_pdf_path, "rb") as f:
-                        st.download_button("📥 Download PDF Report", f, file_name=merged_pdf_path, mime="application/pdf")
-                    os.remove(merged_pdf_path)
-        except Exception as e:
-            st.error(f"❌ Model inference failed: {str(e)}")
+    if st.button("📝 Generate Report PDF"):
+        with st.spinner("Generating report..."):
+            temp_image_path = "temp_fundus.png"
+            image.save(temp_image_path)
+
+            # Delete old PDFs if they exist
+            for file in ['DRprediction.pdf', 'description.pdf']:
+                if os.path.exists(file):
+                    os.remove(file)
+
+            # Get fresh report content
+            report_text = generate_report_text(predicted_class, confidence, stage_prob)
+
+            # Generate both PDFs
+            pdf1 = pdfmaker2.create_pdf('DRprediction.pdf', stage_prob, patient_info, general_info, temp_image_path)
+            pdf2_path = pdfmaker2.create_pdf_helper(report_text)
+
+            # Merge into final report
+            merged_pdf_path = pdfmaker2.merge_pdfs(['DRprediction.pdf', pdf2_path],'merged.pdf')
+
+            # Serve to user
+            pn=st.session_state.user_info.get("name", "")
+            pid=st.session_state.user_info.get("patient_id", "")
+
+            with open(merged_pdf_path, "rb") as f:
+                    st.download_button("📥 Download PDF Report", f, file_name=pn+'_'+pid+'.pdf', mime="application/pdf")
+
+            os.remove(merged_pdf_path)
+            os.remove(temp_image_path)
+
 
 with tab3:
     st.title("📚 Diabetic Retinopathy Stages")

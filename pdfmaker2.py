@@ -7,7 +7,7 @@ import numpy as np
 from PIL import Image
 import onnxruntime as ort
 from datetime import datetime
-
+import re
 import google.generativeai as genai
 from fpdf import FPDF
 import tempfile
@@ -170,21 +170,30 @@ def section4(canvas_obj,image_path,**params):
     draw_separator(canvas_obj, 80 * mm)
 
 def section5(canvas_obj,prob_data):
+    print(prob_data)
     draw_bold_underline(canvas_obj,'Findings',20*mm,70*mm)
 
-    data = [
-        ['Stage', 'Probability (%)'],
-        ['A', '10'],
-        ['B', '10'],
-        ['C', '20'],
-        ['D','60']
-    ]
+    data = {
+        'Stage': 'Probability (%)',
+        'No DR': '10',
+        'Mild': '10',
+        'Moderate': '20',
+        'Severe DR':'0',
+        'Proliferative DR':'60'
+       
+    }
     if prob_data!=None:
-        for i in range(len(prob_data)):
-            data[i+1][0]=prob_data[i][0]
-            data[i+1][1]=str(prob_data[i][0])
-            
+        for i in (prob_data):
+            data[i]=str(round(100*prob_data[i],2))
+    data=[
+        ['Stage',data['Stage']],
+         ['No DR',data['No DR']],
+         ['Mild',data['Mild']],
+         ['Moderate',data['Moderate']],
+         ['Severe',data['Severe']],
+         ['Proliferative DR',data['Proliferative DR']],
 
+        ]
     draw_table_on_canvas(canvas_obj,20,35,data)
 
 def section6(canvas_obj, general_prediction):
@@ -222,6 +231,62 @@ def create_pdf(filename,prob_data,patient_info,general_info,myimage):
 
 
 def create_pdf_helper(report_text):
+    def format_text2(raw_text):
+        #return raw_text
+        # Convert **bold** to <b> tags
+        html_text = re.sub(r"\*\*(.*?)\*\*", r"<b>\1</b>", raw_text)
+
+        # Normalize newlines for block parsing
+        html_text = html_text.replace("\r\n", "\n").replace("\r", "\n")
+
+        # Split by lines
+        lines = html_text.strip().split("\n")
+        formatted_lines = []
+        in_list = False
+
+        # for line in lines:
+        #     stripped = line.strip()
+
+        #     # Bullet point detection (handles -, *, or numbered lists)
+        #     if re.match(r"^[-*]\s+", stripped):
+        #         if not in_list:
+        #             formatted_lines.append("<ul>")
+        #             in_list = True
+        #         bullet = re.sub(r"^[-*]\s+", "", stripped)
+        #         formatted_lines.append(f"<li>{bullet}</li>")
+        #     elif re.match(r"^\d+\.\s+", stripped):
+        #         if not in_list:
+        #             formatted_lines.append("<ul>")
+        #             in_list = True
+        #         bullet = re.sub(r"^\d+\.\s+", "", stripped)
+        #         formatted_lines.append(f"<li>{bullet}</li>")
+        #     else:
+        #         if in_list:
+        #             formatted_lines.append("</ul>")
+        #             in_list = False
+        #         if stripped:  # Ignore blank lines
+        #             formatted_lines.append(f"<br/>{stripped}")
+
+        # if in_list:
+        #     formatted_lines.append("</ul>")
+
+        for line in lines:
+            stripped = line.strip()
+
+            # Match bullet points: '-', '*', or numbered lists like '1.'
+            if re.match(r"^[-*]\s+", stripped):
+                content = re.sub(r"^[-*]\s+", "", stripped)
+                formatted_lines.append(f"<br/>{content}")
+            elif re.match(r"^\d+\.\s+", stripped):
+                content = re.sub(r"^\d+\.\s+", "", stripped)
+                formatted_lines.append(f"<br/>{content}")
+            elif stripped:
+                formatted_lines.append(f"<br/>{stripped}")  # Regular line
+
+            # Combine back to HTML
+            final_html = "".join(formatted_lines)
+            return final_html
+
     # === Local re-use of section1 and disclaimer ===
     def section1_on_canvas(canvas_obj):
         logo_path = "eyelogopng.png"
@@ -270,11 +335,8 @@ def create_pdf_helper(report_text):
     flowables = []
 
     for paragraph in report_text.strip().split("\n\n"):
-        if paragraph.strip().startswith("**") and "**" in paragraph.strip()[2:]:
-            header_text = paragraph.strip().replace("**", "")
-            flowables.append(Paragraph(header_text, styles["SectionHeader"]))
-        else:
-            flowables.append(Paragraph(paragraph.replace("\n", "<br/>"), styles["NormalJustified"]))
+        formatted_paragraph = format_text2(paragraph)
+        flowables.append(Paragraph(formatted_paragraph, styles["NormalJustified"]))
         flowables.append(Spacer(1, 8))
 
     doc.build(flowables, onFirstPage=add_section1_and_disclaimer, onLaterPages=add_section1_and_disclaimer)
