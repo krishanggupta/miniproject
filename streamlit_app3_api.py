@@ -21,7 +21,7 @@ from reportlab.lib.colors import grey
 st.set_page_config(page_title="Diabetic Retinopathy Classifier", layout="wide")
 
 #genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
-genai.configure(api_key="AIzaSyAIhrSVwoKg69NrmWhE_e-B34zkWz5nZJ8")
+genai.configure(api_key="IzaSyAIhrSVwoKg69NrmWhE_e-B34zkWz5nZJ8")
 
 model = genai.GenerativeModel(model_name="gemini-2.0-flash")
 
