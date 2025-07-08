@@ -274,6 +274,6 @@ with tab5:
     -  Inference done using ONNX Runtime 
     -  Goal: Assist medical professionals in early detection of DR.
 
-    [📧 Contact](mailto:krishanggupta.kg@gmail.com) | [🌐 LinkedIn](https://www.linkedin.com/in/krishang-gupta-0b0041305/)
+    [Email](mailto:krishanggupta.kg@gmail.com) | [LinkedIn](https://www.linkedin.com/in/krishang-gupta-0b0041305/)
     """)
     
