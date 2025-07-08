@@ -257,14 +257,11 @@ with tab3:
 with tab4:
     st.title("📊 Model Information")
     st.markdown("""
-    - **Model Type**: DenseNet121 (converted to ONNX)
-    - **Trained On**: Labeled Indian DR Dataset
+    - **Model Type**: InceptionV3
+    - **Trained On**: APTOS 2019 Dataset
     - **Input Size**: 224x224 RGB (normalized float32)
     - **Classes**: No DR, Mild, Moderate, Severe, Proliferative DR
     - **Accuracy Achieved**: ~73%
-    - **Inference Engine**: ONNX Runtime (no TensorFlow required!)
-    """)
-
     st.image("https://miro.medium.com/v2/resize:fit:1400/1*ckLNL5fx3JNhgNzKeOnx_w.png", caption="Densenet Architecture")
 
 
@@ -273,9 +270,9 @@ with tab5:
     st.markdown("""
     This app was created by **Krishang Gupta** as part of a machine learning project to automate the classification of Diabetic Retinopathy using deep learning.
 
-    - 🔬 Based on Densenet121, converted to ONNX
-    - 🧠 Inference done using ONNX Runtime (faster + cloud-ready)
-    - 🧑‍🏫 Goal: Assist medical professionals in early detection of DR
+    - 🔬 Based on CNN Architecture
+    - 🧠 Inference done using ONNX Runtime 
+    - 🧑‍🏫 Goal: Assist medical professionals in early detection of DR.
 
     [📧 Contact](mailto:krishanggupta.kg@gmail.com) | [🌐 LinkedIn](https://www.linkedin.com/in/krishang-gupta-0b0041305/)
     """)
