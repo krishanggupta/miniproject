@@ -270,9 +270,9 @@ with tab5:
     st.markdown("""
     This app was created by **Krishang Gupta** as part of a machine learning project to automate the classification of Diabetic Retinopathy using deep learning.
 
-    - 🔬 Based on CNN Architecture
-    - 🧠 Inference done using ONNX Runtime 
-    - 🧑‍🏫 Goal: Assist medical professionals in early detection of DR.
+    -  Based on CNN Architecture
+    -  Inference done using ONNX Runtime 
+    -  Goal: Assist medical professionals in early detection of DR.
 
     [📧 Contact](mailto:krishanggupta.kg@gmail.com) | [🌐 LinkedIn](https://www.linkedin.com/in/krishang-gupta-0b0041305/)
     """)
