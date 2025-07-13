@@ -1,2 +1,2 @@
 Link:
-https://krishangdb.streamlit.app
+https://krishangvnitmedassistant.streamlit.app
